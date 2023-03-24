@@ -1,4 +1,4 @@
-.register__button {
+.auth-reg__button {
   background-color: #FFFFFF;
   color: #000000;
   font-family: 'Inter';
@@ -15,7 +15,7 @@
 }
 
 @media screen and (max-width: 568px) {
-  .register__button {
+  .auth-reg__button {
     font-size: 16px;
     line-height: 19px;
     margin: 173px 0px 20px;

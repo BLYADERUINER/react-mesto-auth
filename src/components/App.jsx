@@ -1,5 +1,5 @@
 import React from 'react';
-import { Route, Routes} from 'react-router-dom';
+import { Route, Routes, Navigate} from 'react-router-dom';
 import Header from './Header.jsx';
 import Main from './Main.jsx';
 import Footer from './Footer.jsx';
@@ -131,6 +131,7 @@ function App() {
         />
         <Route path="/sign-up" element={<Register />} />
         <Route path="/sign-in" element={<Login />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       <Footer />
         {/* Popup edit profile */}

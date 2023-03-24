@@ -1,4 +1,4 @@
-.register__title {
+.auth-reg__title {
   font-family: 'Inter';
   font-style: normal;
   font-weight: 900;
@@ -9,7 +9,7 @@
 }
 
 @media screen and (max-width: 568px) {
-  .register__title {
+  .auth-reg__title {
     font-size: 20px;
     line-height: 24px;
   }
