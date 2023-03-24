@@ -1,5 +1,5 @@
 import React from 'react';
-import { Route, Routes, Navigate} from 'react-router-dom';
+import { Route, Routes} from 'react-router-dom';
 import Header from './Header.jsx';
 import Main from './Main.jsx';
 import Footer from './Footer.jsx';
@@ -10,6 +10,9 @@ import EditAvatarPopup from './EditAvatarPopup.jsx';
 import AddPlacePopup from './AddPlacePopup.jsx';
 import { CurrentUserContext } from '../context/CurrentUserContext.jsx';
 import { api } from '../utils/api.js';
+import Login from './Login.jsx';
+import Register from './Register.jsx';
+import ProtectedRouteElement from './ProtectedRoute.jsx';
 
 
 
@@ -108,24 +111,27 @@ function App() {
 
   return (
     <CurrentUserContext.Provider value={currentUser} >
-      <Routes>
-        <Route path="/sign-up" element={<></>} />
-        <Route path="/sign-in" element={<></>} />
-        <Route path="/" element={loggedIn ? <Navigate to="/" replace /> : <Navigate to="/sign-in" replace /> } />
-      </Routes>
       <Header />
-      <Main
-        userName={currentUser.name}
-        userDescription={currentUser.about}
-        userAvatar={currentUser.avatar}
-        cardsData={cards}
-        onCardLike={handleCardClick}
-        onCardClick={setSelectedCard}
-        onCardDelete={handleCardDelete}
-        handleEditAvatarCLick={handleEditAvatarPopupOnClick}
-        handleEditProfileClick={handleEditProfileOnClick}
-        handleAddPlaceClick={handleAddCardPopupOnClick}
-      />
+      <Routes>
+        <Route path="/" element={
+          <ProtectedRouteElement
+            Component={Main}
+            loggedIn={loggedIn}
+            userName={currentUser.name}
+            userDescription={currentUser.about}
+            userAvatar={currentUser.avatar}
+            cardsData={cards}
+            onCardLike={handleCardClick}
+            onCardClick={setSelectedCard}
+            onCardDelete={handleCardDelete}
+            handleEditAvatarCLick={handleEditAvatarPopupOnClick}
+            handleEditProfileClick={handleEditProfileOnClick}
+            handleAddPlaceClick={handleAddCardPopupOnClick}
+          />}
+        />
+        <Route path="/sign-up" element={<Register />} />
+        <Route path="/sign-in" element={<Login />} />
+      </Routes>
       <Footer />
         {/* Popup edit profile */}
       <EditProfilePopup
