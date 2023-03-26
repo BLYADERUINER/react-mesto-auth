@@ -10,6 +10,7 @@
 /* header */
 @import './blocks/header/header.css';
 @import './blocks/header/__logo/header__logo.css';
+@import './blocks/header/__link/header__link.css';
 
 /* content */
 @import './blocks/content/content.css';
