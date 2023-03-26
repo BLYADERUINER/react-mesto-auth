@@ -32,7 +32,28 @@ function App() {
   const [isToggleInfoTooltip, setToggleInfoTooltip] = React.useState(false);
   const navigate = useNavigate();
 
-  // ручка отправки регистрации
+
+
+  const handleTokenCheck = React.useCallback(() => {
+    if (localStorage.getItem('jwt')){
+      let jwt =  localStorage.getItem('jwt');
+
+      if (jwt) {
+        auth.checkToken(jwt)
+          .then((res) => {
+            if (res) {
+              setUserMail(res.data.email);
+            }
+
+            setLoggedIn(true);
+            navigate('/', {replace: true});
+          })
+          .catch((error) => console.log(error));
+        }
+    }
+  }, [navigate]);
+
+  // ручка регистрации
   const handleRegister = (password, email) => {
     auth.register(password, email)
     .then(() => {
@@ -48,6 +69,7 @@ function App() {
     });
   };
 
+  // ручка логина
   const handleLogin = ((password, email) => {
     auth.login(password, email)
     .then((data) => {
@@ -58,8 +80,13 @@ function App() {
         setTimeout(() => navigate('/', {replace: true}), 1000);
       }
     })
-    .catch((response) =>  console.log(response.error));
+    .catch((error) =>  console.log(error));
   });
+
+  const handleSignout = () => {
+    localStorage.removeItem('jwt');
+    setLoggedIn(false);
+  };
 
   // открытие попов используя Хук состояния
   function handleEditProfileOnClick() {
@@ -150,9 +177,13 @@ function App() {
     .catch((error) => console.log(error));
   }
 
+  React.useEffect(() => {
+    handleTokenCheck();
+  }, [handleTokenCheck]);
+
   return (
     <CurrentUserContext.Provider value={currentUser} >
-      <Header userMail={userMail} />
+      <Header userMail={userMail} onSignout={handleSignout} />
       <Routes>
         <Route path="/" element={
           <ProtectedRouteElement
