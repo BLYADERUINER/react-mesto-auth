@@ -1,5 +1,6 @@
 .auth-reg__input {
   border: none;
+  outline: none;
   border-bottom: 2px solid #CCCCCC;
   font-family: 'Inter';
   font-style: normal;

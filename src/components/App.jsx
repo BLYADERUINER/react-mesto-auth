@@ -20,6 +20,7 @@ import InfoTooltip from './InfoTooltip.jsx';
 
 function App() {
   const [loggedIn, setLoggedIn] = React.useState(false);
+  const [userMail, setUserMail] = React.useState('');
   const [currentUser, setCurrentUser] = React.useState({});
   const [cards, setCards] = React.useState([]);
 
@@ -31,17 +32,9 @@ function App() {
   const [isToggleInfoTooltip, setToggleInfoTooltip] = React.useState(false);
   const navigate = useNavigate();
 
+  // ручка отправки регистрации
   const handleRegister = (password, email) => {
     auth.register(password, email)
-    .then((response) => {
-      try {
-        if (response.status === 200) {
-          return response.json();
-        }
-      } catch(err) {
-        return (err);
-      }
-    })
     .then(() => {
       setToggleInfoTooltip(true);
       setTimeout(() => navigate('/sign-in', {replace: true}), 1000);
@@ -53,7 +46,20 @@ function App() {
     .finally(() => {
       handleInfoTooltip();
     });
-  }
+  };
+
+  const handleLogin = ((password, email) => {
+    auth.login(password, email)
+    .then((data) => {
+      if (data.token) {
+        setUserMail(email);
+        localStorage.setItem('jwt', data.token);
+        setLoggedIn(true);
+        setTimeout(() => navigate('/', {replace: true}), 1000);
+      }
+    })
+    .catch((response) =>  console.log(response.error));
+  });
 
   // открытие попов используя Хук состояния
   function handleEditProfileOnClick() {
@@ -146,7 +152,7 @@ function App() {
 
   return (
     <CurrentUserContext.Provider value={currentUser} >
-      <Header />
+      <Header userMail={userMail} />
       <Routes>
         <Route path="/" element={
           <ProtectedRouteElement
@@ -165,7 +171,7 @@ function App() {
           />}
         />
         <Route path="/sign-up" element={<Register handleRegister={handleRegister} />} />
-        <Route path="/sign-in" element={<Login />} />
+        <Route path="/sign-in" element={<Login handleLogin={handleLogin} />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       <Footer />
