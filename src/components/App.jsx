@@ -1,5 +1,5 @@
 import React from 'react';
-import { Route, Routes, Navigate} from 'react-router-dom';
+import { Route, Routes, Navigate, useNavigate} from 'react-router-dom';
 import Header from './Header.jsx';
 import Main from './Main.jsx';
 import Footer from './Footer.jsx';
@@ -10,9 +10,11 @@ import EditAvatarPopup from './EditAvatarPopup.jsx';
 import AddPlacePopup from './AddPlacePopup.jsx';
 import { CurrentUserContext } from '../context/CurrentUserContext.jsx';
 import { api } from '../utils/api.js';
+import * as auth from '../utils/auth.js';
 import Login from './Login.jsx';
 import Register from './Register.jsx';
 import ProtectedRouteElement from './ProtectedRoute.jsx';
+import InfoTooltip from './InfoTooltip.jsx';
 
 
 
@@ -25,6 +27,33 @@ function App() {
   const [isEditProfilePopupOpen, setEditProfilePopupOpen] = React.useState(false);
   const [isAddPlacePopupOpen, setAddPlacePopupOpen] = React.useState(false);
   const [isEditAvatarPopupOpen, setEditAvatarPopupOpen] = React.useState(false);
+  const [isInfoTooltip, setInfoTooltip] = React.useState(false);
+  const [isToggleInfoTooltip, setToggleInfoTooltip] = React.useState(false);
+  const navigate = useNavigate();
+
+  const handleRegister = (password, email) => {
+    auth.register(password, email)
+    .then((response) => {
+      try {
+        if (response.status === 200) {
+          return response.json();
+        }
+      } catch(err) {
+        return (err);
+      }
+    })
+    .then(() => {
+      setToggleInfoTooltip(true);
+      setTimeout(() => navigate('/sign-in', {replace: true}), 1000);
+    })
+    .catch((err) => {
+      console.log(err);
+      setToggleInfoTooltip(false);
+    })
+    .finally(() => {
+      handleInfoTooltip();
+    });
+  }
 
   // открытие попов используя Хук состояния
   function handleEditProfileOnClick() {
@@ -39,11 +68,17 @@ function App() {
     setEditAvatarPopupOpen(true);
   }
 
+  // функция открытия подсказки
+  function handleInfoTooltip() {
+    setInfoTooltip(true);
+  }
+
   // функция закрытия всех попапов
   function closeAllPopups() {
     setEditProfilePopupOpen(false);
     setAddPlacePopupOpen(false);
     setEditAvatarPopupOpen(false);
+    setInfoTooltip(false);
     setSelectedCard(null);
   }
 
@@ -129,7 +164,7 @@ function App() {
             handleAddPlaceClick={handleAddCardPopupOnClick}
           />}
         />
-        <Route path="/sign-up" element={<Register />} />
+        <Route path="/sign-up" element={<Register handleRegister={handleRegister} />} />
         <Route path="/sign-in" element={<Login />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
@@ -162,6 +197,11 @@ function App() {
         popupName="delete-card"
         popupTitle="Вы уверены ?"
         popupTextButton="Да"
+      />
+      <InfoTooltip
+        isOpen={isInfoTooltip}
+        onClose={closeAllPopups}
+        handleTooltip={isToggleInfoTooltip}
       />
     </CurrentUserContext.Provider>
   );

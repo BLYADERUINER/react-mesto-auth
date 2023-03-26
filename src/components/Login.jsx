@@ -5,7 +5,7 @@ function Login() {
       <form className="auth-reg__form" id="login">
         <input className="auth-reg__input" type="email" placeholder="Email" />
         <input className="auth-reg__input" type="password" placeholder="Пароль" />
-        <button className="button auth-reg__button">Войти</button>
+        <button className="auth-reg__button">Войти</button>
       </form>
     </div>
   )
