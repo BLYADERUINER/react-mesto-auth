@@ -15,6 +15,7 @@ import Login from './Login.jsx';
 import Register from './Register.jsx';
 import ProtectedRouteElement from './ProtectedRoute.jsx';
 import InfoTooltip from './InfoTooltip.jsx';
+import PopupLoading from './PopupLoading.jsx';
 
 
 
@@ -23,6 +24,7 @@ function App() {
   const [userMail, setUserMail] = React.useState('');
   const [currentUser, setCurrentUser] = React.useState({});
   const [cards, setCards] = React.useState([]);
+  const [isLoading, setLoading] = React.useState(true);
 
   const [selectedCard, setSelectedCard] = React.useState(null);
   const [isEditProfilePopupOpen, setEditProfilePopupOpen] = React.useState(false);
@@ -32,10 +34,11 @@ function App() {
   const [isToggleInfoTooltip, setToggleInfoTooltip] = React.useState(false);
   const navigate = useNavigate();
 
-
-
+  // ручка проверки токена
   const handleTokenCheck = React.useCallback(() => {
-    if (localStorage.getItem('jwt')){
+    if (!localStorage.getItem('jwt')) {
+      setLoading(false)
+    } else {
       let jwt =  localStorage.getItem('jwt');
 
       if (jwt) {
@@ -44,14 +47,29 @@ function App() {
             if (res) {
               setUserMail(res.data.email);
             }
-
             setLoggedIn(true);
             navigate('/', {replace: true});
           })
-          .catch((error) => console.log(error));
-        }
+          .catch((error) => console.log(error))
+          .finally(() => setLoading(false));
+      }
     }
   }, [navigate]);
+
+  // ручка логина
+  const handleLogin = ((password, email) => {
+    auth.login(password, email)
+    .then((data) => {
+      if (data.token) {
+        setUserMail(email);
+        localStorage.setItem('jwt', data.token);
+        setLoggedIn(true);
+        navigate('/', {replace: true});
+      }
+    })
+    .catch((error) =>  console.log(error))
+    .finally(() => setLoading(false));
+  });
 
   // ручка регистрации
   const handleRegister = (password, email) => {
@@ -68,20 +86,6 @@ function App() {
       handleInfoTooltip();
     });
   };
-
-  // ручка логина
-  const handleLogin = ((password, email) => {
-    auth.login(password, email)
-    .then((data) => {
-      if (data.token) {
-        setUserMail(email);
-        localStorage.setItem('jwt', data.token);
-        setLoggedIn(true);
-        setTimeout(() => navigate('/', {replace: true}), 1000);
-      }
-    })
-    .catch((error) =>  console.log(error));
-  });
 
   const handleSignout = () => {
     localStorage.removeItem('jwt');
@@ -114,6 +118,11 @@ function App() {
     setInfoTooltip(false);
     setSelectedCard(null);
   }
+
+  // получение токена
+  React.useEffect(() => {
+    handleTokenCheck();
+  }, [handleTokenCheck]);
 
   // получение инфы о юзере через хук эффекта
   React.useEffect(() => {
@@ -177,9 +186,9 @@ function App() {
     .catch((error) => console.log(error));
   }
 
-  React.useEffect(() => {
-    handleTokenCheck();
-  }, [handleTokenCheck]);
+  if (isLoading) {
+    return <PopupLoading isLoading={isLoading} />;
+  }
 
   return (
     <CurrentUserContext.Provider value={currentUser} >
@@ -235,11 +244,16 @@ function App() {
         popupTitle="Вы уверены ?"
         popupTextButton="Да"
       />
+        {/* Popup tooltip */}
       <InfoTooltip
         isOpen={isInfoTooltip}
         onClose={closeAllPopups}
         handleTooltip={isToggleInfoTooltip}
       />
+        {/* Popup loading
+      <PopupLoading
+        isLoading={isLoading}
+      /> */}
     </CurrentUserContext.Provider>
   );
 }

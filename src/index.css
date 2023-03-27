@@ -67,6 +67,7 @@
 @import './blocks/pop-up/__error/_visble/pop-up__error_visible.css';
 @import './blocks/pop-up/__tooltip-image/pop-up__tooltip-image.css';
 @import './blocks/pop-up/__tooltip-text/pop-up__tooltip-text.css';
+@import './blocks/pop-up/__loading-text/pop-up__loading.css';
 
 /* Register */
 @import './blocks/auth-reg/auth-reg.css';
