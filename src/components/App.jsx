@@ -31,16 +31,15 @@ function App() {
   const [isAddPlacePopupOpen, setAddPlacePopupOpen] = React.useState(false);
   const [isEditAvatarPopupOpen, setEditAvatarPopupOpen] = React.useState(false);
   const [isInfoTooltip, setInfoTooltip] = React.useState(false);
-  const [isToggleInfoTooltip, setToggleInfoTooltip] = React.useState(false);
+  const [isToggleInfoTooltip, setToggleInfoTooltip] = React.useState({image: '', text: ''});
   const navigate = useNavigate();
 
   // ручка проверки токена
   const handleTokenCheck = React.useCallback(() => {
-    if (!localStorage.getItem('jwt')) {
+    const jwt =  localStorage.getItem('jwt');
+    if (!jwt) {
       setLoading(false)
     } else {
-      let jwt =  localStorage.getItem('jwt');
-
       if (jwt) {
         auth.checkToken(jwt)
           .then((res) => {
@@ -58,35 +57,43 @@ function App() {
 
   // ручка логина
   const handleLogin = ((password, email) => {
+    setLoading(true);
     auth.login(password, email)
     .then((data) => {
       if (data.token) {
         setUserMail(email);
         localStorage.setItem('jwt', data.token);
         setLoggedIn(true);
-        navigate('/', {replace: true});
+          navigate('/', {replace: true});
       }
     })
-    .catch((error) =>  console.log(error))
+    .catch((error) => {
+      console.log(error);
+      setToggleInfoTooltip({image: false, text: 'Неверный адрес электронной почты или пароль'});
+      handleInfoTooltip();
+    })
     .finally(() => setLoading(false));
   });
 
   // ручка регистрации
   const handleRegister = (password, email) => {
+    setLoading(true);
     auth.register(password, email)
     .then(() => {
-      setToggleInfoTooltip(true);
+      setToggleInfoTooltip({image: true, text: 'Вы успешно зарегистрировались!'});
       setTimeout(() => navigate('/sign-in', {replace: true}), 1000);
     })
-    .catch((err) => {
-      console.log(err);
-      setToggleInfoTooltip(false);
+    .catch((error) => {
+      console.log(error);
+      setToggleInfoTooltip({image: false, text: 'Что-то пошло не так! Попробуйте ещё раз.'});
     })
     .finally(() => {
+      setLoading(false);
       handleInfoTooltip();
     });
   };
 
+  // ручка выхода
   const handleSignout = () => {
     localStorage.removeItem('jwt');
     setLoggedIn(false);
@@ -126,19 +133,21 @@ function App() {
 
   // получение инфы о юзере через хук эффекта
   React.useEffect(() => {
-    api.getUserInfo()
-    .then((name) => setCurrentUser(name))
-    .catch((error) => console.log(error));
-  }, []);
+    loggedIn &&
+      api.getUserInfo()
+      .then((name) => setCurrentUser(name))
+      .catch((error) => console.log(error));
+  }, [loggedIn]);
 
   // получение карточек через хук эффекта
   React.useEffect(() => {
-    api.getCards()
-    .then((cards) => {
-      setCards(cards);
-    })
-    .catch((error) => console.log(error));
-  }, []);
+    loggedIn &&
+      api.getCards()
+      .then((cards) => {
+        setCards(cards);
+      })
+      .catch((error) => console.log(error));
+  }, [loggedIn]);
 
   // функция лайка карточки
   function handleCardClick(card) {
@@ -248,12 +257,9 @@ function App() {
       <InfoTooltip
         isOpen={isInfoTooltip}
         onClose={closeAllPopups}
-        handleTooltip={isToggleInfoTooltip}
+        handleToggleImageTooltip={isToggleInfoTooltip.image}
+        handleToggleTextTooltip={isToggleInfoTooltip.text}
       />
-        {/* Popup loading
-      <PopupLoading
-        isLoading={isLoading}
-      /> */}
     </CurrentUserContext.Provider>
   );
 }

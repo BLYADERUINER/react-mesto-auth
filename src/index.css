@@ -80,3 +80,5 @@
 @import './blocks/auth-reg/__input/auth-reg__input.css';
 @import './blocks/auth-reg/__form/auth-reg__form.css';
 @import './blocks/auth-reg/__button/auth-reg__button.css';
+
+@import './blocks/scrollbar/scrollbar.css';
